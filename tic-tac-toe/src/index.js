@@ -49,7 +49,8 @@ class Game extends React.Component {
     this.state = {
       history: [
         {
-          squares: Array(9).fill(null)
+          squares: Array(9).fill(null),
+          valueRowCol: Array(2).fill(null)
         }
       ],
       xIsNext: true,
@@ -61,22 +62,36 @@ class Game extends React.Component {
     const history = this.state.history
     const current = history[history.length - 1]
     const squares = current.squares.slice()
+    const valRowCol = getRowCol(i)
     if (calculateWinner(squares) || squares[i]) {
       return
     }
     squares[i] = this.state.xIsNext ? 'X' : 'O'
     this.setState({
-      history: history.concat([{ squares }]),
+      history: history.concat([{ squares, valRowCol }]),
       xIsNext: !this.state.xIsNext,
       stepNumber: history.length
     })
   }
 
   jumpTo (step) {
-    this.setState({
-      stepNumber: step,
-      xIsNext: step % 2 === 0
-    })
+    if (step === 0) {
+      this.setState({
+        history: [
+          {
+            squares: Array(9).fill(null),
+            valueRowCol: Array(2).fill(null)
+          }
+        ],
+        xIsNext: true,
+        stepNumber: 0
+      })
+    } else {
+      this.setState({
+        stepNumber: step,
+        xIsNext: step % 2 === 0
+      })
+    }
   }
 
   render () {
@@ -89,7 +104,9 @@ class Game extends React.Component {
     const moves = history.map((step, move) => {
       console.log('step', step)
       console.log('move', move)
-      const desc = move ? 'Go to Move #' + move : 'Go to game start'
+      const desc = move
+        ? 'Go to Move #' + move + '    =>    ' + step.valRowCol
+        : 'Go to game start'
       return (
         <li key={move}>
           <button onClick={() => this.jumpTo(move)}>{desc}</button>
@@ -140,4 +157,20 @@ function calculateWinner (squares) {
     }
   }
   return null
+}
+
+function getRowCol (buttonClicked) {
+  const rowCol = [
+    [1, 1],
+    [1, 2],
+    [1, 3],
+    [2, 1],
+    [2, 2],
+    [2, 3],
+    [3, 1],
+    [3, 2],
+    [3, 3]
+  ]
+
+  return rowCol[buttonClicked]
 }
